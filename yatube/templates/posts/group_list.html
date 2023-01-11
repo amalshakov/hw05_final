@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Записи сообщества {{ group }}
+{% endblock %}
+
+{% block content %}
+<h1> {{ group }} </h1>
+<p> {{ group.description|linebreaks }} </p>
+  <!-- класс py-5 создает отступы сверху и снизу блока -->
+  <div class="container py-5">
+
+{% for post in page_obj %}
+{% include 'includes/posts.html' %}
+{% endfor %}
+
+    {% include 'includes/paginator.html' %}
+    
+  </div>
+{% endblock %}
