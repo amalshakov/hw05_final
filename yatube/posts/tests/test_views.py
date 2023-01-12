@@ -35,9 +35,9 @@ class PostURLTests(TestCase):
         self.user = User.objects.get(username='testuser')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        self.user3 = User.objects.create(username='testuser3')
-        self.authorized_client3 = Client()
-        self.authorized_client3.force_login(self.user3)
+        self.new_user = User.objects.create(username='testuser3')
+        self.new_authorized_client = Client()
+        self.new_authorized_client.force_login(self.new_user)
 
     def test_post_in_home(self):
         response = self.authorized_client.get(reverse('posts:index'))
@@ -167,18 +167,19 @@ class PostURLTests(TestCase):
 
     def test_work_cache(self):
         """Тестирование работы кэша."""
-        response1 = self.authorized_client.get(reverse('posts:index'))
+        initinal_response = self.authorized_client.get(reverse('posts:index'))
         Post.objects.get(id=self.post.id).delete()
-        response2 = self.authorized_client.get(reverse('posts:index'))
-        self.assertEqual(response1.content, response2.content)
+        cached_response = self.authorized_client.get(reverse('posts:index'))
+        self.assertEqual(initinal_response.content, cached_response.content)
         cache.clear()
-        response3 = self.authorized_client.get(reverse('posts:index'))
-        self.assertNotEqual(response1.content, response3.content)
+        new_response = self.authorized_client.get(reverse('posts:index'))
+        self.assertNotEqual(initinal_response.content, new_response.content)
 
     def test_authorized_client_subscribe_on_authors(self):
         """Авторизованный пользователь может подписываться
-        на других пользователей и удалять их из подписок."""
-        post2 = Post.objects.create(
+        на других пользователей."""
+        follow_count = Follow.objects.all().count()
+        Post.objects.create(
             text='Тестовый пост2',
             group=self.group,
             author=User.objects.create(username='testuser2')
@@ -187,31 +188,57 @@ class PostURLTests(TestCase):
             user=User.objects.get(username='testuser'),
             author=User.objects.get(username='testuser2'),
         )
-        response = self.authorized_client.get(reverse('posts:follow_index'))
-        self.assertIn(post2, response.context['page_obj'])
+        self.assertEqual(Follow.objects.all().count(), follow_count + 1)
+
+    def test_authorized_client_unsubscribe_on_authors(self):
+        """Авторизованный пользователь может отписываться от пользователей."""
+        follow_count = Follow.objects.all().count()
+        Post.objects.create(
+            text='Тестовый пост2',
+            group=self.group,
+            author=User.objects.create(username='testuser2')
+        )
+        Follow.objects.create(
+            user=User.objects.get(username='testuser'),
+            author=User.objects.get(username='testuser2'),
+        )
         Follow.objects.filter(
             user=User.objects.get(username='testuser'),
             author=User.objects.get(username='testuser2'),
         ).delete()
-        response = self.authorized_client.get(reverse('posts:follow_index'))
-        self.assertNotIn(post2, response.context['page_obj'])
+        self.assertEqual(Follow.objects.all().count(), follow_count)
 
     def test_new_post_on_author_in_follower(self):
         """Новая запись пользователя появляется в ленте тех,
-        кто на него подписан и не появляется в ленте тех, кто не подписан."""
+        кто на него подписан."""
         Follow.objects.create(
             user=User.objects.get(username='testuser'),
             author=User.objects.create(username='testuser2'),
         )
-        post2 = Post.objects.create(
+        new_post = Post.objects.create(
             text='Тестовый пост2',
             group=self.group,
             author=User.objects.get(username='testuser2')
         )
         response = self.authorized_client.get(reverse('posts:follow_index'))
-        self.assertIn(post2, response.context['page_obj'])
-        response = self.authorized_client3.get(reverse('posts:follow_index'))
-        self.assertNotIn(post2, response.context['page_obj'])
+        self.assertIn(new_post, response.context['page_obj'])
+
+    def test_new_post_on_author_in_not_follower(self):
+        """Новая запись пользователя не появляется в ленте тех,
+        кто на него не подписан."""
+        Follow.objects.create(
+            user=User.objects.get(username='testuser'),
+            author=User.objects.create(username='testuser2'),
+        )
+        new_post = Post.objects.create(
+            text='Тестовый пост2',
+            group=self.group,
+            author=User.objects.get(username='testuser2')
+        )
+        response = self.new_authorized_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertNotIn(new_post, response.context['page_obj'])
 
 
 class PaginatorViewsTest(TestCase):

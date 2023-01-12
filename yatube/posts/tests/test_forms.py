@@ -118,12 +118,12 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(post.group, self.group2)
 
     def test_post_comment_in_authorized_client(self):
-        """Комментировать посты может только авторизованный пользователь.
+        """Авторизованный пользователь может комментировать посты.
         После успешной отправки комментарий появляется на странице поста.
         """
         comment_count = Comment.objects.all().count()
         form_data = {
-            'text': 'Текст комментария',
+            'text': 'Текст комментария 2',
         }
         response = self.authorized_client.post(
             reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
@@ -143,10 +143,24 @@ class PostCreateFormTests(TestCase):
                 post=self.post.id,
             ).exists()
         )
-        #  Неавторизованный пользователь не может комментировать пост
+
+    def test_post_comment_in_client(self):
+        """Гость не может комментировать посты"""
+        comment_count = Comment.objects.all().count()
+        form_data = {
+            'text': 'Текст комментария 2',
+        }
         response = self.client.post(
             reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
             data=form_data,
             follow=True
         )
-        self.assertEqual(Comment.objects.all().count(), comment_count + 1)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(Comment.objects.all().count(), comment_count)
+        self.assertFalse(
+            Comment.objects.filter(
+                text=form_data['text'],
+                author=self.user,
+                post=self.post.id,
+            ).exists()
+        )

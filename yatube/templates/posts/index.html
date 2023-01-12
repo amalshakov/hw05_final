@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-  {% include 'includes/switcher.html' %}
+  {% include 'includes/switcher.html' with index=True %}
   <!-- класс py-5 создает отступы сверху и снизу блока -->
   <div class="container py-5">
     {% for post in page_obj %}
