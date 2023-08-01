@@ -19,6 +19,8 @@ SECRET_KEY = 'wyw#p+d4wxoc*ky$qkwpei)%auzwd_-debph+p@3wp4!bncjm$'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'www.morongod.pythonanywhere.com',
+    'morongod.pythonanywhere.com',
     'localhost',
     '127.0.0.1',
     '[::1]',
@@ -26,11 +28,12 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
+    'debug_toolbar',
     'sorl.thumbnail',
+    'about.apps.AboutConfig',
+    'core.apps.CoreConfig',
     'posts.apps.PostsConfig',
     'users.apps.UsersConfig',
-    'core.apps.CoreConfig',
-    'about.apps.AboutConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -47,6 +51,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'yatube.urls'

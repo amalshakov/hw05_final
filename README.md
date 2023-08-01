@@ -1,3 +1,48 @@
-# hw05_final
-
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+# Проект Yatube
+### Yatube - это социальная сеть с авторизацией, персональными лентами, комментариями и подписками на авторов статей.
+- Регистрируется и восстанавливается доступ по электронной почте;
+- Добавляются изображения к посту;
+- Создаются и редактируются собственные записи;
+- Просмотриваются страницы других авторов;
+- Комментируются записи других авторов;
+- Подписки и отписки от авторов;
+- Записи назначаются в отдельные группы;
+- Личная страница для публикации записей;
+- Отдельная лента с постами авторов на которых подписан пользователь;
+- Через панель администратора модерируются записи, происходит управление пользователями и создаются группы.
+### Запуск проекта:
+- Клонируйте репозиторий
+```
+git@github.com:amalshakov/hw05_final.git
+```
+- Перейдите в папку с проектом и установите виртуальное окружение
+```
+python -m venv venv
+```
+- Активируйте виртуальное окружение
+```
+source venv/Scripts/activate
+```
+- Установите зависимости
+```
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+- Выполните миграции
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+- Запустите проект локально
+```
+python manage.py runserver
+```
+- Создайте суперюзера
+```
+python manage.py createsuperuser
+```
+## Технологии:
+- Python
+- Django
+## Автор:
+- [Мальшаков Александр](https://github.com/amalshakov)

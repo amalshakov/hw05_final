@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Технологии{% endblock %}
 {% block content %}
+<div class="container py-5">
 <div class="row">
   <h1>Вот что я умею</h1>
   <aside class="col-12 col-md-3">
@@ -11,10 +13,27 @@
       <li class="list-group-item">
         Django
       </li>
+      <li class="list-group-item">
+        Unittest
+      </li>
+      <li class="list-group-item">
+        Pythonanywhere
+      </li>
+      <li class="list-group-item">
+        HTML
+      </li>
+      <li class="list-group-item">
+        CSS
+      </li>
+      <li class="list-group-item">
+        Bootstrap
+      </li>
     </ul>
   </aside>
   <article class="col-12 col-md-9">
-    <p>Текст страницы "Технологии"</p>
+    <img src="{% static 'my/stepik-cert.png' %}" width="585" height="414" class="d-inline-block align-top" alt="">
+    <img src="{% static 'my/django.png' %}" width="530" height="490" class="d-inline-block align-top" alt="">
   </article>
+</div>
 </div>
 {% endblock %}

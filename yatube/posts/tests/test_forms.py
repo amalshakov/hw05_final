@@ -25,20 +25,10 @@ class PostCreateFormTests(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
-        cls.group2 = Group.objects.create(
-            title='Тестовая группа2',
-            slug='test-slug2',
-            description='Тестовое описание2',
-        )
         cls.post = Post.objects.create(
             text='Тестовый пост',
             group=cls.group,
             author=User.objects.create(username='testuser')
-        )
-        cls.comment = Comment.objects.create(
-            post=cls.post,
-            author=cls.post.author,
-            text='Текст комментария',
         )
 
     @classmethod
@@ -53,7 +43,7 @@ class PostCreateFormTests(TestCase):
 
     def test_create_post(self):
         """Валидная форма создает запись в БД."""
-        posts_count = Post.objects.all().count()
+        posts_count = Post.objects.count()
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -82,7 +72,7 @@ class PostCreateFormTests(TestCase):
             response,
             reverse('posts:profile', kwargs={'username': self.user.username})
         )
-        self.assertEqual(Post.objects.all().count(), posts_count + 1)
+        self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(
             Post.objects.filter(
                 text=form_data['text'],
@@ -96,10 +86,15 @@ class PostCreateFormTests(TestCase):
         """При отправке валидной формы со страницы редактирования
         поста происходит изменение поста в базе данных.
         """
-        posts_count = Post.objects.all().count()
+        new_group = Group.objects.create(
+            title='Тестовая группа2',
+            slug='test-slug2',
+            description='Тестовое описание2',
+        )
+        posts_count = Post.objects.count()
         form_data = {
             'text': 'Отредактированный текст поста',
-            'group': self.group2.id,
+            'group': new_group.id,
         }
         response = self.authorized_client.post(
             reverse('posts:post_edit', kwargs={'post_id': self.post.id}),
@@ -111,17 +106,17 @@ class PostCreateFormTests(TestCase):
             response,
             reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         )
-        self.assertEqual(Post.objects.all().count(), posts_count)
-        post = Post.objects.get(id=self.post.id)
+        self.assertEqual(Post.objects.count(), posts_count)
+        post = Post.objects.first()
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.text, form_data['text'])
-        self.assertEqual(post.group, self.group2)
+        self.assertEqual(post.group, new_group)
 
     def test_post_comment_in_authorized_client(self):
         """Авторизованный пользователь может комментировать посты.
         После успешной отправки комментарий появляется на странице поста.
         """
-        comment_count = Comment.objects.all().count()
+        comment_count = Comment.objects.count()
         form_data = {
             'text': 'Текст комментария 2',
         }
@@ -135,7 +130,7 @@ class PostCreateFormTests(TestCase):
             response,
             reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         )
-        self.assertEqual(Comment.objects.all().count(), comment_count + 1)
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
         self.assertTrue(
             Comment.objects.filter(
                 text=form_data['text'],
@@ -146,7 +141,7 @@ class PostCreateFormTests(TestCase):
 
     def test_post_comment_in_client(self):
         """Гость не может комментировать посты"""
-        comment_count = Comment.objects.all().count()
+        comment_count = Comment.objects.count()
         form_data = {
             'text': 'Текст комментария 2',
         }
@@ -156,7 +151,7 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(Comment.objects.all().count(), comment_count)
+        self.assertEqual(Comment.objects.count(), comment_count)
         self.assertFalse(
             Comment.objects.filter(
                 text=form_data['text'],

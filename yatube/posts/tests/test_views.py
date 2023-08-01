@@ -178,7 +178,7 @@ class PostURLTests(TestCase):
     def test_authorized_client_subscribe_on_authors(self):
         """Авторизованный пользователь может подписываться
         на других пользователей."""
-        follow_count = Follow.objects.all().count()
+        follow_count = Follow.objects.count()
         Post.objects.create(
             text='Тестовый пост2',
             group=self.group,
@@ -188,11 +188,11 @@ class PostURLTests(TestCase):
             user=User.objects.get(username='testuser'),
             author=User.objects.get(username='testuser2'),
         )
-        self.assertEqual(Follow.objects.all().count(), follow_count + 1)
+        self.assertEqual(Follow.objects.count(), follow_count + 1)
 
     def test_authorized_client_unsubscribe_on_authors(self):
         """Авторизованный пользователь может отписываться от пользователей."""
-        follow_count = Follow.objects.all().count()
+        follow_count = Follow.objects.count()
         Post.objects.create(
             text='Тестовый пост2',
             group=self.group,
@@ -206,7 +206,7 @@ class PostURLTests(TestCase):
             user=User.objects.get(username='testuser'),
             author=User.objects.get(username='testuser2'),
         ).delete()
-        self.assertEqual(Follow.objects.all().count(), follow_count)
+        self.assertEqual(Follow.objects.count(), follow_count)
 
     def test_new_post_on_author_in_follower(self):
         """Новая запись пользователя появляется в ленте тех,
@@ -275,7 +275,7 @@ class PaginatorViewsTest(TestCase):
         response = self.client.get(reverse('posts:index') + '?page=2')
         self.assertEqual(
             len(response.context['page_obj']),
-            Post.objects.all().count() - settings.POSTS_ON_PAGE
+            Post.objects.count() - settings.POSTS_ON_PAGE
         )
 
     def test_group_list_first_page_contains_ten_records(self):
@@ -292,7 +292,7 @@ class PaginatorViewsTest(TestCase):
                     kwargs={'slug': self.group.slug}) + '?page=2')
         self.assertEqual(
             len(response.context['page_obj']),
-            Post.objects.all().count() - settings.POSTS_ON_PAGE
+            Post.objects.count() - settings.POSTS_ON_PAGE
         )
 
     def test_profile_first_page_contains_ten_records(self):
@@ -309,5 +309,5 @@ class PaginatorViewsTest(TestCase):
                     kwargs={'username': self.user.username}) + '?page=2')
         self.assertEqual(
             len(response.context['page_obj']),
-            Post.objects.all().count() - settings.POSTS_ON_PAGE
+            Post.objects.count() - settings.POSTS_ON_PAGE
         )
